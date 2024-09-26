@@ -50,16 +50,14 @@ def model(dbt, con):
 class TestMDPluginSaaSMode:
     @pytest.fixture(scope="class")
     def profiles_config_update(self, dbt_profile_target):
-        md_config = {"token": dbt_profile_target.get("token")}
-        plugins = [{"module": "motherduck", "config": md_config}]
+        md_config = {"motherduck_token": dbt_profile_target.get("token"), "motherduck_saas_mode": 1}
         return {
             "test": {
                 "outputs": {
                     "dev": {
                         "type": "duckdb",
                         "path": dbt_profile_target.get("path", ":memory:"),
-                        "plugins": plugins,
-                        "config_options": {"motherduck_saas_mode": 1},
+                        "config_options": md_config,
                     }
                 },
                 "target": "dev",
@@ -102,7 +100,7 @@ class TestMDPluginSaaSMode:
     def test_motherduck(self, project):
         (motherduck_saas_mode,) = project.run_sql(MOTHERDUCK_SAAS_MODE_QUERY, fetch="one")
         if motherduck_saas_mode not in ["1", "true"]:
-            project.run_sql("SET motherduck_saas_mode=1")
+            raise ValueError("SaaS mode was not set properly")
         result = run_dbt(expect_pass=False)
         expected_msg = "Python models are disabled when MotherDuck SaaS Mode is on."
         assert [_res for _res in result.results if _res.status != RunStatus.Success][0].message == expected_msg
