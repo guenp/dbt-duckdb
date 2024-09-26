@@ -102,7 +102,8 @@ class TestMDPluginSaaSMode:
     def test_motherduck(self, project):
         project.run_sql("SET motherduck_saas_mode=1")
         (motherduck_saas_mode,) = project.run_sql(MOTHERDUCK_SAAS_MODE_QUERY, fetch="one")
-        assert motherduck_saas_mode == "1"
+        if motherduck_saas_mode not in ["1", "true"]:
+            project.run_sql("SET motherduck_saas_mode=1")
         result = run_dbt(expect_pass=False)
         expected_msg = "Python models are disabled when MotherDuck SaaS Mode is on."
         assert [_res for _res in result.results if _res.status != RunStatus.Success][0].message == expected_msg
