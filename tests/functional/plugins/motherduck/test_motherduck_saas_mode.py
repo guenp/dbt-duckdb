@@ -100,7 +100,6 @@ class TestMDPluginSaaSMode:
         project.run_sql(f"DROP TABLE {database_name}.plugin_table")
 
     def test_motherduck(self, project):
-        project.run_sql("SET motherduck_saas_mode=1")
         (motherduck_saas_mode,) = project.run_sql(MOTHERDUCK_SAAS_MODE_QUERY, fetch="one")
         if motherduck_saas_mode not in ["1", "true"]:
             project.run_sql("SET motherduck_saas_mode=1")
